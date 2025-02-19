@@ -4,9 +4,9 @@
         <div :key="index+'key-tier'" v-for="(list,index) in lists" class="">
             <section class="bg-gray-900 flex justify-between">
                 <!-- Título -->
-                <div :style="`background-color:${list.color}`" class="max-w-32 min-h-28 w-full h-auto flex items-center justify-center">
-                    <input @blur="resetEditItem" :id="'lisId-'+list.id" v-if=" editItem.id === list.id" placeholder="Categoría" @keyup.enter="editName(index)" class="text-black placeholder-slate-100 font-medium text-lg w-32  bg-transparent opacity-70 text-center" type="text" v-model="editItem.title"/>
-                    <p v-else @click="setEditItem(list)" class="text-black cursor-pointer font-medium text-lg w-32 bg-transparent text-center"> {{list.title || '#'}} </p>
+                <div :style="`background-color:${list.color}`" class="max-w-40 min-h-28 truncate text-wrap px-0.5 w-full h-auto flex items-center justify-center">
+                    <input @blur="resetEditItem" :id="'lisId-'+list.id" v-if=" editItem.id === list.id" placeholder="Categoría" @keyup.enter="editName(index)" class="text-white text-decorate placeholder-slate-100 font-medium text-lg w-32  bg-transparent opacity-70 text-center" type="text" v-model="editItem.title"/>
+                    <p v-else @click="setEditItem(list)" class="text-white text-decorate cursor-pointer font-medium text-xl w-full bg-transparent text-center"> {{list.title || '#'}} </p>
                 </div> 
                 <!-- Imagenes -->
                 <div @dragenter="(e)=>onDropRow(e,index)" @dragleave="(e)=>onLeaveRow(e,index)" class="w-full flex flex-wrap content-start">
@@ -32,6 +32,12 @@
                         </button>
                     </div>
                     <div>
+                        <button class="hover:bg-gray-700 rounded relative">
+                            <label class="relative">
+                                <img title="Cambiar color" class="cursor-pointer h-6 w-10" src="@/assets/brush-svgrepo-com.svg">
+                                <input type="color" class="absolute opacity-0 w-full shink-0"  @change="(e)=>colorPicker(e,list)" id="colorPicker" :value="list.color" />
+                            </label>
+                        </button>
                         <button class="hover:bg-gray-700 rounded" @click="deleteRow(index)">
                             <img title="Eliminar fila" class="h-8 w-10 opacity-70" src="@/assets/trash-svgrepo-com.svg">
                         </button>
@@ -73,11 +79,11 @@
 </template>
 
 <script lang="js">
-import { defineComponent, reactive,ref,computed,watch } from 'vue'
+import { defineComponent, reactive,ref,computed,watch, nextTick } from 'vue'
 import { lists, colors, images } from './TierListComposer.js'
 export default defineComponent({
     name:"TierList",
-    setup(){
+    setup(pros,{emit}){
 
         const editItem = ref({})
 
@@ -120,25 +126,31 @@ export default defineComponent({
             try{
                 const _options = {
                     "startIn":"downloads",
-                    "multiple": false,
+                    "multiple": true,
                     "mode":"read",
                     "types": [{"accept":{"image/png":[".png"],"image/svg+xml":[".svg"],"image/jpeg":[".jpg",".jpeg"]}}],
                     "excludeAcceptAllOption": true
                 }
     
-                const [ _event ] = await window.showOpenFilePicker(_options)
-                const _file = await _event.getFile()
-                // validar archivo
-                if(_file && !formatImages.some((f)=>f==_file.type) && (_file.size >= 1048579)){
-                    alert("Seleccione una imagen con peso menor o igual a 1Mb. tipo .png, .svg, .jpg, .jpeg")
-                    return
-                }
+                const _events = await window.showOpenFilePicker(_options)
+                
+                for (let index = 0; index < _events.length; index++) {
+                    const _event = _events[index]
+                    
+                    const _file = await _event.getFile()
+                    // validar archivo
+                    if(_file && !formatImages.some((f)=>f==_file.type) && (_file.size >= 1048579)){
+                        alert("Seleccione una imagen con peso menor o igual a 1Mb. tipo .png, .svg, .jpg, .jpeg")
+                        return
+                    }
 
-                const reader = new FileReader()
-                reader.readAsDataURL(_file)
-                reader.onload = (eventReader)=>{
-                    const countId = images.length ? images.toSorted((a,b)=>a.id-b.id)[images.length-1].id +1 : 1
-                    images.push({"id":countId,"show":true,"data":eventReader.target.result})
+                    const reader = new FileReader()
+                    reader.readAsDataURL(_file)
+                    reader.onload = (eventReader)=>{
+                        const countId = images.length ? images.toSorted((a,b)=>a.id-b.id)[images.length-1].id +1 : 1
+                        images.push({"id":countId,"show":true,"data":eventReader.target.result})
+                    }
+
                 }
 
             }catch(e){
@@ -203,8 +215,17 @@ export default defineComponent({
             })
         }
 
+        const colorPicker = (e,list)=>{
+            list.color = e.target.value
+        }
+
         //computed
         const imagesComputed = computed(()=>images)
+
+        //watch
+        watch(editItem,(newvalue,oldvalue)=>{
+            // 
+        })
 
         return{
             editItem,
@@ -224,8 +245,21 @@ export default defineComponent({
             setEditItem,
             onDropRow,
             onLeaveRow,
-            resetCategories
+            resetCategories,
+            colorPicker
         }
+    },
+    mounted(){
+        nextTick(()=>{
+            
+        })
+        
     }
 })
 </script>
+
+<style scoped>
+    .text-decorate {
+        text-shadow: 0 0 2px #000000, 0 0 5px #000000;
+    }
+</style>
