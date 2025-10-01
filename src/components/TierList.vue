@@ -1,13 +1,16 @@
 <template>
 <div id="container" class="w-full mt-10" >
-    <section class="mx-auto mt-5 w-5/6 divide-y divide-gray-700 border border-gray-400">
+    <section class="mx-auto w-5/6 divide-y">
+        <p>Categorias - Cree una clasificación de imagenes por categoría</p>
+    </section>
+    <section class="mx-auto w-5/6 divide-y divide-gray-700 border border-gray-400">
         <div :key="index+'key-tier'" v-for="(list,index) in lists" class="">
             <section class="bg-gray-900 flex justify-between">
                 <!-- Título -->
                 <div :style="`background-color:${list.color}`" class="max-w-40 min-h-28 truncate text-wrap px-0.5 w-full h-auto flex items-center justify-center">
                     <input @blur="resetEditItem" :id="'lisId-'+list.id" v-if=" editItem.id === list.id" placeholder="Categoría" @keyup.enter="editName(index)" class="text-white text-decorate placeholder-slate-100 font-medium text-lg w-32  bg-transparent opacity-70 text-center" type="text" v-model="editItem.title"/>
                     <p v-else @click="setEditItem(list)" class="text-white text-decorate cursor-pointer font-medium text-xl w-full bg-transparent text-center"> {{list.title || '#'}} </p>
-                </div> 
+                </div>
                 <!-- Imagenes -->
                 <div @dragenter="(e)=>onDropRow(e,index)" @dragleave="(e)=>onLeaveRow(e,index)" class="w-full flex flex-wrap content-start">
                     <img
@@ -24,22 +27,22 @@
                 <!-- Opciones -->
                 <div class="w-24 h-auto border-l border-gray-700 bg-gray-900 flex items-center px-0.5">
                     <div class="">
-                        <button class="hover:bg-gray-700 rounded" @click="toUpRow(list,index)">
+                        <button title="Subir categoría" class="hover:bg-gray-700 rounded" @click="toUpRow(list,index)">
                             <img class="h-8 w-10" src="@/assets/up-arrow-svgrepo-com.svg">
                         </button>
-                        <button class="hover:bg-gray-700 rounded" @click="toDownRow(list,index)">
+                        <button title="Bajar categoría" class="hover:bg-gray-700 rounded" @click="toDownRow(list,index)">
                             <img class="transform rotate-180 h-8 w-10" src="@/assets/up-arrow-svgrepo-com.svg">
                         </button>
                     </div>
                     <div>
-                        <button class="hover:bg-gray-700 rounded relative">
+                        <button title="Cambiar color" class="hover:bg-gray-700 rounded relative">
                             <label class="relative">
                                 <img title="Cambiar color" class="cursor-pointer h-6 w-10" src="@/assets/brush-svgrepo-com.svg">
                                 <input type="color" class="absolute opacity-0 w-full shink-0"  @change="(e)=>colorPicker(e,list)" id="colorPicker" :value="list.color" />
                             </label>
                         </button>
                         <button class="hover:bg-gray-700 rounded" @click="deleteRow(index)">
-                            <img title="Eliminar fila" class="h-8 w-10 opacity-70" src="@/assets/trash-svgrepo-com.svg">
+                            <img title="Eliminar categoría" class="h-8 w-10 opacity-70" src="@/assets/trash-svgrepo-com.svg">
                         </button>
                     </div>
                 </div>
@@ -48,23 +51,37 @@
         <!-- Añadir categoría -->
         <div>
             <button title="Añadir categoría" @click="addCategory" class="w-full cursor-pointer hover:bg-gray-700 h-12 items-center flex justify-center">
-                <img class="mx-auto h-8 w-8" src="@/assets/add-circle-svgrepo-com.svg">
+                <div class="inline-flex space-x-2">
+                    <img class="mx-auto h-8 w-8" src="@/assets/add-circle-svgrepo-com.svg">
+                    <p class="mt-1">Añadir otra categoría</p>
+                </div>
             </button>
         </div>   
     </section>
 
     <!-- botones -->
-    <section class="w-full flex p-5 justify-center space-x-2 items-center">
+    <section class="w-full flex p-5 justify-center space-x-24 items-center">
         <button @click="addImage" title="Añadir imagen" class="cursor-pointer w-10 h-10 bg-gray-800 hoverbg-gray-700 rounded">
-            <img class="mx-auto h-8 w-8" src="@/assets/add-circle-svgrepo-com.svg">
+            <div class="inline-flex space-x-2">
+                <img class="mx-auto h-8 w-8" src="@/assets/add-circle-svgrepo-com.svg">
+                <p class="mt-1 leading-3">Añadir imagenes</p>
+            </div>
+
         </button>
         <button @click="resetCategories" title="restablecer categorias" class="cursor-pointer w-10 h-10 bg-gray-800 hover:bg-gray-700 rounded">
-            <img class="mx-auto h-8 w-8" src="@/assets/reset-svgrepo-com.svg">
+            <div  class="inline-flex space-x-2">
+                <img class="mx-auto h-8 w-8" src="@/assets/reset-svgrepo-com.svg">
+                <p class="mt-1">Restablecer</p>
+            </div>
+
         </button>
     </section>
 
     <!-- Imagenes -->
-    <section id="list-images" @dragenter="(e)=>onDropRow(e,null)" @dragleave="(e)=>onLeaveRow(e,null)" class="mb-10 mx-auto mt-5 min-h-[300px] w-5/6 flex flex-wrap content-start divide-y divide-gray-700 border border-gray-400">
+    <section class="mx-auto w-5/6 divide-y">
+        <p>Listado de imagenes - Arrastre una imagen hasta la categoría deseada!</p>
+    </section>
+    <section id="list-images" @dragenter="(e)=>onDropRow(e,null)" @dragleave="(e)=>onLeaveRow(e,null)" class="mb-10 mx-auto min-h-[300px] w-5/6 flex flex-wrap content-start divide-y divide-gray-700 border border-gray-400">
         <img 
             draggable="true" 
             v-for="(image,index) in imagesComputed"
